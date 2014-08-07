@@ -5,9 +5,11 @@ The MIT Licence.  See /LICENSE.txt
 package main
 
 import (
+	"bufio"
 	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 )
 
@@ -36,14 +38,21 @@ func (this savefile) getPath() string {
 }
 
 func (this savefile) makeHash() (hashedfile, error) {
-	contents, err := ioutil.ReadFile(this.path)
+	f, err := os.Open(this.path)
 	if err != nil {
 		return hashedfile{}, err
 	}
-	h := sha1.New()
-	h.Write(contents)
-	bs := h.Sum(nil)
-	return hashedfile{this, fmt.Sprintf("%x", bs)}, nil
+	defer f.Close()
+	var reader *bufio.Reader
+	reader = bufio.NewReader(f)
+	sha1 := sha1.New()
+	_, err = io.Copy(sha1, reader)
+	if err != nil {
+		return hashedfile{}, err
+	}
+	hash := hex.EncodeToString(sha1.Sum(nil))
+
+	return hashedfile{this, hash}, nil
 }
 
 func (this hashedfile) getHash() (string, error) {
@@ -70,17 +79,30 @@ func (this hashedfile) getHashPrefix() string {
 }
 
 func (this hashedfile) copyToObject() error {
-	contents, err := ioutil.ReadFile(this.path)
+	err := os.MkdirAll(fmt.Sprintf("%s/%s", getObjectsDir(), this.getHashPrefix()), 0766)
 	if err != nil {
 		return err
 	}
-	err = os.MkdirAll(fmt.Sprintf("%s/%s", getObjectsDir(), this.getHashPrefix()), 0766)
-	if err != nil {
-		return err
-	}
-	return ioutil.WriteFile(this.getObjectFilename(), contents, 0755)
+	return copyFile(this.path, this.getObjectFilename())
 }
 
 func (this hashedfile) hardLink() error {
 	return os.Link(this.getObjectFilename(), this.getSnapshotFilename())
+}
+
+func copyFile(src, dest string) error {
+	sf, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sf.Close()
+
+	df, err := os.Create(dest)
+	if err != nil {
+		return err
+	}
+	defer df.Close()
+
+	_, err = io.Copy(df, sf)
+	return err
 }

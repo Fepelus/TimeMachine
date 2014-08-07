@@ -17,7 +17,7 @@ const (
 	DEFAULT_TARGET_ROOT  = "/TimeMachine"
 	SNAPSHOTS_DIR        = "/snapshots"
 	OBJECTS_DIR          = "/objects"
-	SNAPSHOT_TIME_FORMAT = "2006-01-02T1304"
+	SNAPSHOT_TIME_FORMAT = "2006-01-02T1504"
 )
 
 var (

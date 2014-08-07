@@ -19,10 +19,12 @@ func visit(path string, f os.FileInfo, err error) error {
 		return os.MkdirAll(fmt.Sprintf("%s%s", getSnapshotDir(), path), 0766)
 	}
 	pathfile := savefile{path}
-	errr := pathfile.hashPathAndLink()
-	if errr != nil {
-		log.Println("ERROR", path, errr)
-	}
+	go func() {
+		errr := pathfile.hashPathAndLink()
+		if errr != nil {
+			log.Println("ERROR", path, errr)
+		}
+	}()
 	return nil
 }
 
