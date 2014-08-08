@@ -1,6 +1,6 @@
 /*
 Copyright 2014 Patrick Borgeest
-The MIT Licence.  See /LICENSE.txt
+MIT Licence.  See /LICENSE.txt
 */
 package main
 
@@ -18,13 +18,13 @@ func visit(path string, f os.FileInfo, err error) error {
 	if f.IsDir() {
 		return os.MkdirAll(fmt.Sprintf("%s%s", getSnapshotDir(), path), 0766)
 	}
-	pathfile := savefile{path}
-	go func() {
+	if f.Mode().IsRegular() {
+		pathfile := savefile{path}
 		errr := pathfile.hashPathAndLink()
 		if errr != nil {
 			log.Println("ERROR", path, errr)
 		}
-	}()
+	}
 	return nil
 }
 

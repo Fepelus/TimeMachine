@@ -1,6 +1,6 @@
 /*
 Copyright 2014 Patrick Borgeest
-The MIT Licence.  See /LICENSE.txt
+MIT Licence.  See /LICENSE.txt
 */
 package main
 
