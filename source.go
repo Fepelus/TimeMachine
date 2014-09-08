@@ -15,6 +15,10 @@ func visit(path string, f os.FileInfo, err error) error {
 	if err != nil {
 		log.Println("Error calling: ", path, err)
 	}
+	if f == nil {
+		log.Println("No file: ", path)
+		return nil
+	}
 	if f.IsDir() {
 		return os.MkdirAll(fmt.Sprintf("%s%s", getSnapshotDir(), path), 0766)
 	}
